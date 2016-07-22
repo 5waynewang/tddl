@@ -616,7 +616,7 @@ public class TAtomDsConfHandle {
         localDruidDataSource.setTestOnBorrow(false);
         localDruidDataSource.setTestWhileIdle(true);
 
-        // localDruidDataSource.setFilters(DEFAULT_TDDL_DRUID_FILTERS);
+        localDruidDataSource.setFilters(tAtomDsConfDO.getFilters());
         localDruidDataSource.setUsername(tAtomDsConfDO.getUserName());
         localDruidDataSource.setPassword(tAtomDsConfDO.getPasswd());
         localDruidDataSource.setDriverClassName(tAtomDsConfDO.getDriverClass());
@@ -676,6 +676,13 @@ public class TAtomDsConfHandle {
                             + defaultIntegrationSorterCalssName);
                 localDruidDataSource.setExceptionSorterClassName(defaultIntegrationSorterCalssName);
             }
+            Properties connectionProperties = new Properties();
+            if (!tAtomDsConfDO.getConnectionProperties().isEmpty()) {
+                connectionProperties.putAll(tAtomDsConfDO.getConnectionProperties());
+            } else {
+                connectionProperties.putAll(TAtomConstants.DEFAULT_MYSQL_CONNECTION_PROPERTIES);
+            }
+            localDruidDataSource.setConnectProperties(connectionProperties);
             localDruidDataSource.setValidationQuery(TAtomConstants.DEFAULT_DRUID_MYSQL_VALIDATION_QUERY);
         }
         // lazy init 先设置为0 后续真正执行时才创建连接

@@ -39,7 +39,7 @@ public class TAtomConstants {
 
     public static Map<String, String>  DEFAULT_MYSQL_CONNECTION_PROPERTIES               = new HashMap<String, String>(1);
     static {
-        TAtomConstants.DEFAULT_MYSQL_CONNECTION_PROPERTIES.put("characterEncoding", "gbk");
+        TAtomConstants.DEFAULT_MYSQL_CONNECTION_PROPERTIES.put("characterEncoding", DEFAULT_MYSQL_CHAR_SET);
     }
 
     public final static String         DEFAULT_ORACLE_DRIVER_CLASS                       = "oracle.jdbc.driver.OracleDriver";

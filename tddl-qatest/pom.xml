@@ -24,12 +24,6 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>tddl-config-diamond</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
 		<!-- test libs -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -37,6 +31,7 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>tddl-repo-bdb</artifactId>
@@ -49,6 +44,7 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

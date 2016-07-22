@@ -1,25 +1,19 @@
 package com.taobao.tddl.config.diamond;
 
-import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-import com.taobao.diamond.client.impl.DiamondEnv;
-import com.taobao.diamond.client.impl.DiamondEnvRepo;
-import com.taobao.diamond.client.impl.DiamondUnitSite;
-import com.taobao.diamond.common.Constants;
 import com.taobao.diamond.manager.ManagerListener;
-import com.taobao.diamond.manager.SkipInitialCallbackListener;
+import com.taobao.diamond.manager.impl.DefaultDiamondManager;
 import com.taobao.tddl.common.exception.TddlException;
 import com.taobao.tddl.common.utils.extension.Activate;
+import com.taobao.tddl.common.utils.logger.Logger;
+import com.taobao.tddl.common.utils.logger.LoggerFactory;
 import com.taobao.tddl.common.utils.mbean.TddlMBean;
 import com.taobao.tddl.common.utils.mbean.TddlMBeanServer;
 import com.taobao.tddl.config.ConfigDataListener;
 import com.taobao.tddl.config.impl.UnitConfigDataHandler;
-
-import com.taobao.tddl.common.utils.logger.Logger;
-import com.taobao.tddl.common.utils.logger.LoggerFactory;
 
 /**
  * 持久配置中心diamond实现
@@ -37,18 +31,14 @@ public class DiamondConfigDataHandler extends UnitConfigDataHandler {
     public static final long    TIMEOUT = 10 * 1000;
     private String              mbeanId;
     private TddlMBean           mbean;
-    private DiamondEnv          env;
+    private DefaultDiamondManager env;
 
     public void doInit() {
         mbean = new TddlMBean("Diamond Config Info " + System.currentTimeMillis());
         mbeanId = dataId + System.currentTimeMillis();
 
         // TODO 外部直接指定ip进行访问
-        if (unitName != null && !"".equals(unitName.trim())) {
-            env = DiamondUnitSite.getDiamondUnitEnv(unitName);
-        } else {
-            env = DiamondEnvRepo.defaultEnv;
-        }
+        env = new DefaultDiamondManager(dataId, new ArrayList<ManagerListener>(0));
 
         if (initialData == null) {
             initialData = getData(TIMEOUT, FIRST_SERVER_STRATEGY);
@@ -60,8 +50,8 @@ public class DiamondConfigDataHandler extends UnitConfigDataHandler {
     public String getNullableData(long timeout, String strategy) {
         String data = null;
         try {
-            data = env.getConfig(dataId, null, Constants.GETCONFIG_LOCAL_SNAPSHOT_SERVER, timeout);
-        } catch (IOException e) {
+            data = env.getConfigureInfomation(timeout);
+        } catch (Exception e) {
             // 不抛异常，只记录一下
             logger.error(e);
         }
@@ -78,8 +68,8 @@ public class DiamondConfigDataHandler extends UnitConfigDataHandler {
     public String getData(long timeout, String strategy) {
         String data = null;
         try {
-            data = env.getConfig(dataId, null, Constants.GETCONFIG_LOCAL_SNAPSHOT_SERVER, timeout);
-        } catch (IOException e) {
+            data = env.getConfigureInfomation(timeout);
+        } catch (Exception e) {
             throw new RuntimeException("get diamond data error!dataId:" + dataId, e);
         }
 
@@ -107,10 +97,7 @@ public class DiamondConfigDataHandler extends UnitConfigDataHandler {
     }
 
     public void closeUnderManager() {
-        List<ManagerListener> listeners = env.getListeners(dataId, null);
-        for (ManagerListener l : listeners) {
-            env.removeListener(dataId, null, l);
-        }
+    	env.setManagerListeners(new ArrayList<ManagerListener>(0));
     }
 
     protected void doDestory() throws TddlException {
@@ -125,7 +112,7 @@ public class DiamondConfigDataHandler extends UnitConfigDataHandler {
      * @param data
      */
     private void addListener0(final ConfigDataListener configDataListener, final Executor executor, String data) {
-        env.addListeners(dataId, null, Arrays.asList(new SkipInitialCallbackListener(data) {
+        env.addManagerListener(new ManagerListener() {
 
             @Override
             public Executor getExecutor() {
@@ -133,7 +120,7 @@ public class DiamondConfigDataHandler extends UnitConfigDataHandler {
             }
 
             @Override
-            public void receiveConfigInfo0(String data) {
+            public void receiveConfigInfo(String data) {
                 configDataListener.onDataRecieved(dataId, data);
                 if (data != null) {
                     mbean.setAttribute(dataId, data);
@@ -141,7 +128,7 @@ public class DiamondConfigDataHandler extends UnitConfigDataHandler {
                     mbean.setAttribute(dataId, "");
                 }
             }
-        }));
+        });
     }
 
     /**
@@ -153,7 +140,7 @@ public class DiamondConfigDataHandler extends UnitConfigDataHandler {
      */
     private void addListener0(final List<ConfigDataListener> configDataListenerList, final Executor executor,
                               String data) {
-        env.addListeners(dataId, null, Arrays.asList(new SkipInitialCallbackListener(data) {
+        env.addManagerListener(new ManagerListener() {
 
             @Override
             public Executor getExecutor() {
@@ -161,7 +148,7 @@ public class DiamondConfigDataHandler extends UnitConfigDataHandler {
             }
 
             @Override
-            public void receiveConfigInfo0(String data) {
+            public void receiveConfigInfo(String data) {
                 for (ConfigDataListener configDataListener : configDataListenerList) {
                     try {
                         configDataListener.onDataRecieved(dataId, data);
@@ -177,7 +164,7 @@ public class DiamondConfigDataHandler extends UnitConfigDataHandler {
                     mbean.setAttribute(dataId, "");
                 }
             }
-        }));
+        });
     }
 
     public String getDataId() {

@@ -106,6 +106,8 @@ public class TAtomDsConfDO implements Cloneable {
      * 应用连接限制: 限制某个应用键值的并发连接数。
      */
     private List<ConnRestrictEntry> connRestrictEntries;
+    
+    private String filters;
 
     public String getIp() {
         return ip;
@@ -336,5 +338,13 @@ public class TAtomDsConfDO implements Cloneable {
     public String toString() {
         return ToStringBuilder.reflectionToString(this, TddlToStringStyle.DEFAULT_STYLE);
     }
+
+	public String getFilters() {
+		return filters;
+	}
+
+	public void setFilters(String filters) {
+		this.filters = filters;
+	}
 
 }

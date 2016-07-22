@@ -41,6 +41,7 @@ public class TAtomConfParser {
     public static final String APP_PREPARED_STATEMENT_CACHE_SIZE_KEY = "preparedStatementCacheSize";
     public static final String APP_ORACLE_CON_TYPE_KEY               = "oracleConType";
     public static final String APP_CON_PROP_KEY                      = "connectionProperties";
+    public static final String APP_FILTERS		                     = "filters";
     public static final String PASSWD_ENC_PASSWD_KEY                 = "encPasswd";
     public static final String PASSWD_ENC_KEY_KEY                    = "encKey";
 
@@ -164,6 +165,10 @@ public class TAtomConfParser {
                             pasObj.setInitPoolSize(pasObj.getMinPoolSize());
                         }
                     }
+                }
+                String filters = TStringUtil.trim(appProp.getProperty(TAtomConfParser.APP_FILTERS));
+                if (TStringUtil.isNotBlank(filters)) {
+                    pasObj.setFilters(filters);
                 }
 
                 // 解析应用连接限制, 参看下面的文档
